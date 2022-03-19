@@ -4,6 +4,7 @@
 
 #### 目录
 
+- 2022-03 [第35期 深入浅出PyTorch](docs/thorough_pytorch2/README.md)
 - 2021-12 [第32期 推荐系统实践(新闻推荐)](docs/fun-rec_32/README.md)
 - 2021-11 [第31期 水很深的深度学习(unusual_deep_learning)](docs/unusual_deep_learning_31/README.md)
 - 2021-10 [第30期 树模型与集成学习(tree_ensemble)](docs/tree_ensemble_30/README.md)
