@@ -354,21 +354,16 @@ def forward(self, x):
 半精度训练主要适用于数据本身的size比较大（比如说3D图像、视频等）。当数据本身的size并不大时（比如手写数字MNIST数据集的图片尺寸只有28*28），使用半精度训练则可能不会带来显著的提升。
 
 
-## 6.5 #### 本节参考
+## 6.5  本节参考
 
 1. [PyTorch官方文档](https://pytorch.org/docs/stable/optim.html)
 2. [参数更新](https://www.pytorchtutorial.com/docs/package_references/torch-optim/)
 3. [给不同层分配不同的学习率](https://blog.csdn.net/jdzwanghao/article/details/90402577)
-1. https://www.kaggle.com/bigironsphere/loss-function-library-keras-pytorch/notebook
-2. https://www.zhihu.com/question/66988664/answer/247952270
-3. https://blog.csdn.net/dss_dssssd/article/details/84103834
-4. https://zj-image-processing.readthedocs.io/zh_CN/latest/pytorch/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/
-5. https://blog.csdn.net/qq_27825451/article/details/95165265
-6. https://discuss.pytorch.org/t/should-i-define-my-custom-loss-function-as-a-class/89468
+4. https://www.kaggle.com/bigironsphere/loss-function-library-keras-pytorch/notebook
+5. https://www.zhihu.com/question/66988664/answer/247952270
+6. https://blog.csdn.net/dss_dssssd/article/details/84103834
+7. https://zj-image-processing.readthedocs.io/zh_CN/latest/pytorch/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/
+8. https://blog.csdn.net/qq_27825451/article/details/95165265
+9. https://discuss.pytorch.org/t/should-i-define-my-custom-loss-function-as-a-class/89468
 
 
-
-
-```python
-
-```
