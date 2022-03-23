@@ -1,7 +1,7 @@
 # PyTorch进阶训练技巧
 ----
 
-（本学习笔记来源于[DataWhale-深入浅出PyTorch](https://github.com/datawhalechina/thorough_pytorch)）
+（本学习笔记来源于[DataWhale-深入浅出PyTorch](https://github.com/datawhalechina/thorough-pytorch)）
 
 
 
