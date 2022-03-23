@@ -1,18 +1,17 @@
 # 第七章 PyTorch可视化
 
- `torchinfo`
+（本学习笔记来源于[DataWhale-深入浅出PyTorch](https://github.com/datawhalechina/thorough-pytorch)）
+
+关键知识点： `torchinfo`,`CNN可视化`,`grad-cam`,`flashtorch`, `TensorBoard`
 
 ## 7.1 可视化网络结构
 
 ### 7.1.1 使用print函数打印模型基础信息
 
-
-
 ```python
 import torchvision.models as models
 model = models.resnet18()
 ```
-
 
 ```python
 ResNet(
@@ -44,8 +43,7 @@ ResNet(
 
 ### 7.1.2 使用torchinfo可视化网络结构
 
-**torchinfo的安装** 
-
+**torchinfo的安装**
 
 ```python
 # 安装方法一
@@ -60,7 +58,6 @@ ResNet(
 
 torchinfo是由torchsummary和torchsummaryX重构出的库, torchsummary和torchsummaryX已经许久没更新了。
 
-
 ```python
 import torchvision.models as models
 from torchinfo import summary
@@ -70,21 +67,15 @@ summary(model, (1, 3, 224, 224)) # 1：batch_size 3:图片的通道数 224: 图�
 
 我们可以看到torchinfo提供了更加详细的信息，包括模块信息（每一层的类型、输出shape和参数量）、模型整体的参数量、模型大小、一次前向或者反向传播需要的内存大小等
 
-
 ## 7.2 CNN可视化
-
-
 
 - 可视化CNN卷积核的方法
 - 可视化CNN特征图的方法
 - 可视化CNN显著图（class activation map）的方法
 
-
 ### 7.2.1 CNN卷积核可视化
 
 PyTorch中可视化卷积核的实现方案，以torchvision自带的VGG11模型为例。
-
-
 
 ```python
 import torch
@@ -95,7 +86,6 @@ print(dict(model.features.named_children()))
 ```
 
 卷积核对应的应为卷积层（Conv2d），这里以第“3”层为例，可视化对应的参数：
-
 
 ```python
 conv1 = dict(model.features.named_children())['3']
@@ -114,7 +104,6 @@ for i in range(0,num):
 
 ### 7.2.2 CNN特征图可视化方法
 
-
 ```python
 class Hook(object):
     def __init__(self):
@@ -128,31 +117,31 @@ class Hook(object):
         self.features_in_hook.append(fea_in)
         self.features_out_hook.append(fea_out)
         return None
-    
+  
 
 def plot_feature(model, idx):
     hh = Hook()
     model.features[idx].register_forward_hook(hh)
-    
+  
     forward_model(model,False)
     print(hh.module_name)
     print((hh.features_in_hook[0][0].shape))
     print((hh.features_out_hook[0].shape))
-    
+  
     out1 = hh.features_out_hook[0]
 
     total_ft  = out1.shape[1]
-    first_item = out1[0].cpu().clone()    
+    first_item = out1[0].cpu().clone()  
 
     plt.figure(figsize=(20, 17))
-    
+  
 
     for ftidx in range(total_ft):
         if ftidx > 99:
             break
         ft = first_item[ftidx]
         plt.subplot(10, 10, ftidx+1) 
-        
+      
         plt.axis('off')
         #plt.imshow(ft[ :, :].detach(),cmap='gray')
         plt.imshow(ft[ :, :].detach())
@@ -166,13 +155,11 @@ CAM系列操作的实现可以通过开源工具包pytorch-grad-cam来实现。
 
 - 安装
 
-
 ```python
 pip install grad-cam
 ```
 
 一个简单的例子
-
 
 ```python
 import torch
@@ -189,7 +176,6 @@ img = Image.open(img_path).resize((224,224))
 rgb_img = np.float32(img)/255
 plt.imshow(img)
 ```
-
 
 ```python
 from pytorch_grad_cam import GradCAM,ScoreCAM,GradCAMPlusPlus,AblationCAM,XGradCAM,EigenCAM,FullGrad
@@ -213,13 +199,11 @@ Image.fromarray(cam_img)
 
 - 安装
 
-
 ```python
 pip install flashtorch
 ```
 
 - 可视化梯度
-
 
 ```python
 # Download example images
@@ -247,7 +231,6 @@ backprop.visualize(owl, target_class, guided=True, use_gpu=True)
 
 可视化卷积核
 
-
 ```python
 import torchvision.models as models
 from flashtorch.activmax import GradientAscent
@@ -271,7 +254,6 @@ g_ascent.visualize(conv5_1, conv5_1_filters, title="VGG16: conv5_1")
 
 ### 7.3.1 TensorBoard安装
 
-
 ```python
 pip install tensorboard
 ```
@@ -283,16 +265,19 @@ pip install tensorboard
 Tensorboard的工作流程简单来说是
 
 - 将代码运行过程中的，某些你关心的数据保存在一个文件夹中：
+
 ```md
 这一步由代码中的writer完成
 ```
+
 - 再读取这个文件夹中的数据，用浏览器显示出来：
+
 ```md
 这一步通过在命令行运行tensorboard完成。
 ```
+
 相关代码：
 首先导入tensorboard
-
 
 ```python
 from torch.utils.tensorboard import SummaryWriter   
@@ -302,7 +287,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 首先我们将其实例化
 
-
 ```python
 writer = SummaryWriter('./path/to/log')
 ```
@@ -311,7 +295,6 @@ writer = SummaryWriter('./path/to/log')
 
 这个对象包含多个方法，比如针对数值，我们可以调用
 
-
 ```python
 writer.add_scalar(tag, scalar_value, global_step=None, walltime=None)
 ```
@@ -319,7 +302,6 @@ writer.add_scalar(tag, scalar_value, global_step=None, walltime=None)
 这里的tag指定可视化时这个变量的名字，scalar_value是你要存的值，global_step可以理解为x轴坐标。
 
 举一个简单的例子：
-
 
 ```python
 for epoch in range(100)
@@ -331,7 +313,6 @@ for epoch in range(100)
 
 同理，除了数值，我们可能还会想看到模型训练过程中的图像
 
-
 ```python
  writer.add_image(tag, img_tensor, global_step=None, walltime=None, dataformats='CHW')
  writer.add_images(tag, img_tensor, global_step=None, walltime=None, dataformats='NCHW')
@@ -341,7 +322,6 @@ for epoch in range(100)
 
 我们已经将关心的数据拿出来了，接下来我们只需要在命令行运行：
 
-
 ```python
 tensorboard --logdir=./path/to/the/folder --port 8123
 ```
@@ -350,13 +330,11 @@ tensorboard --logdir=./path/to/the/folder --port 8123
 
 如果发现不显示数据，注意检查一下路径是否正确，命令行这里注意是
 
-
 ```python
 --logdir=./path/to/the/folder 
 ```
 
 而不是
-
 
 ```python
 --logdir= './path/to/the/folder '
@@ -366,14 +344,10 @@ tensorboard --logdir=./path/to/the/folder --port 8123
 
 #### 其他注意项
 
-**1.变量归类 ** 
+**1.变量归类 **
+
+
 命名变量的时候可以使用形如
-
-
-```python
-
-```
-
 
 ```python
 writer.add_scalar('loss/loss1', loss1, epoch)
@@ -384,16 +358,12 @@ writer.add_scalar('loss/loss3', loss3, epoch)
 的格式，这样3个loss就会被显示在同一个section。
 
 **2.同时显示多个折线图**
-假如使用了两种学习率去训练同一个网络，想要比较它们训练过程中的loss曲线，只需要将两个日志文件夹放到同一目录下，并在命令行运行
 
+
+假如使用了两种学习率去训练同一个网络，想要比较它们训练过程中的loss曲线，只需要将两个日志文件夹放到同一目录下，并在命令行运行
 
 ```python
 tensorboard --logdir=./path/to/the/root --port 8123
-```
-
-
-```python
-
 ```
 
 ## 7.4 参考资料
@@ -402,10 +372,5 @@ tensorboard --logdir=./path/to/the/root --port 8123
 2. https://andrewhuman.github.io/cnn-hidden-layout_search
 3. https://github.com/jacobgil/pytorch-grad-cam
 4. https://github.com/MisaOgura/flashtorch
-2. https://zhuanlan.zhihu.com/p/103630393
-3. https://github.com/lanpa/tensorboardX
-
-
-```python
-
-```
+5. https://zhuanlan.zhihu.com/p/103630393
+6. https://github.com/lanpa/tensorboardX
