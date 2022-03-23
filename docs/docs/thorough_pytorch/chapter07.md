@@ -260,7 +260,7 @@ pip install tensorboard
 
 也可以使用PyTorch自带的tensorboard工具，此时不需要额外安装tensorboard。
 
-## 7.3.2 TensorBoard可视化的基本逻辑
+### 7.3.2 TensorBoard可视化的基本逻辑
 
 Tensorboard的工作流程简单来说是
 
@@ -344,7 +344,7 @@ tensorboard --logdir=./path/to/the/folder --port 8123
 
 #### 其他注意项
 
-**1.变量归类 **
+**1.变量归类**
 
 
 命名变量的时候可以使用形如
