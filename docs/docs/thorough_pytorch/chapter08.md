@@ -2,7 +2,7 @@
 
 （本学习笔记来源于[DataWhale-深入浅出PyTorch](https://github.com/datawhalechina/thorough-pytorch)）
 
-关键知识点： `torchinfo`,`CNN可视化`,`grad-cam`,`flashtorch`, `TensorBoard`
+关键知识点： `TorchVision`,`torchtext`,`PyTorchVideo`
 
 **本章简介**
 
