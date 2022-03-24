@@ -141,7 +141,7 @@ def plot_feature(model, idx):
             break
         ft = first_item[ftidx]
         plt.subplot(10, 10, ftidx+1) 
-      
+    
         plt.axis('off')
         #plt.imshow(ft[ :, :].detach(),cmap='gray')
         plt.imshow(ft[ :, :].detach())
@@ -346,7 +346,6 @@ tensorboard --logdir=./path/to/the/folder --port 8123
 
 **1.变量归类**
 
-
 命名变量的时候可以使用形如
 
 ```python
@@ -358,7 +357,6 @@ writer.add_scalar('loss/loss3', loss3, epoch)
 的格式，这样3个loss就会被显示在同一个section。
 
 **2.同时显示多个折线图**
-
 
 假如使用了两种学习率去训练同一个网络，想要比较它们训练过程中的loss曲线，只需要将两个日志文件夹放到同一目录下，并在命令行运行
 

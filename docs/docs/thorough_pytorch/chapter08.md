@@ -417,9 +417,4 @@ bleu_score(candidate_corpus, references_corpus)
 ## 8.5 参考资料
 
 - [torchtext官方文档](https://pytorch.org/text/stable/index.html)
-- [atnlp/torchtext-summary](
-
-
-```python
-
-```
+- [Datawhale-深入浅出PyTorch](https://github.com/datawhalechina/thorough-pytorch)
