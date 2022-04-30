@@ -2,7 +2,7 @@
 
 Linux文件系统 和 Windows文件系统有一些区别，Windows是分C盘、D盘、E盘...的，但是在Linux中是有一个最大的目录，称之为根目录，用 / 表示，根目录下面会有很多子目录，这些子目录其实可以理解为windows中C盘、D盘、E盘。
 
-![img.png](chapter01-01.png)
+![img.png](images/chapter01-01.png)
 
 - bin 存放二进制可执行文件(ls,cat,mkdir等)
 - boot 存放用于系统引导时使用的各种文件
@@ -421,7 +421,7 @@ drwxr-xr-x. 3 root root   17 Mar 29 14:33 abc
 
 ## 文件属性
 
-![img_1.png](chapter01-03.png)
+![img_1.png](images/chapter01-03.png)
 
 **第一段：权限** 长度`11`，不足补`-`,结尾符`.`
 
