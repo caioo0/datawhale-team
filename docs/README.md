@@ -3,7 +3,7 @@
 记录我参加的Datawhale组队学习，包括笔记和习题解答。
 
 #### 目录
-
+- 2022-06 [第35期 深入浅出PyTorch](docs/gitModeling_37/README.md)
 - 2022-03 [第35期 深入浅出PyTorch](docs/thorough_pytorch/README.md)
 - 2021-12 [第32期 推荐系统实践(新闻推荐)](docs/fun-rec_32/README.md)
 - 2021-11 [第31期 水很深的深度学习(unusual_deep_learning)](docs/unusual_deep_learning_31/README.md)

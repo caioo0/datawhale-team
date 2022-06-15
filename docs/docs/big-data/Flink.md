@@ -47,8 +47,7 @@ Spark Streaming 微批次：
 
 **流架构最大的好处就是具有极低的延迟。**
 
-
-### 分层 api 
+### 分层 api
 
 ![image.png](./assets/1651311457632-image.png)
 
@@ -57,7 +56,6 @@ Spark Streaming 微批次：
 实际上，大多数应用并不需要上述的底层抽象，而是针对核心API(Core APIs)进行编程，比如DataStream API(有界或无界流数据)以及DataSet API(有界数据集)。这些API为数据处理提供了通用的构建模块，比如由用户定义的多种形式的转换（transformations），连接（joins）,聚合（aggregations）,窗口操作（Windows）等等。
 
 DataSet API 为有界数据集提供了额外的支持，例如循环与迭代。这些API处理的数据类型以类（classes）的形式由各自的编程语言所表示。
-
 
 ## 2. Flink 核心架构
 
