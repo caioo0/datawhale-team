@@ -79,6 +79,4 @@
       * [Task07：Transformers解析序列标注任务](docs/transformers_NLP_28/task07.md)
       * [Task08：Transformers解决抽取式问答任务](docs/transformers_NLP_28/task08.md)
       * [Task09：Transformers解决机器翻译任务](docs/transformers_NLP_28/task09.md)
-
-    
-        
+      
