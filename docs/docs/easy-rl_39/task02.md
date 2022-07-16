@@ -71,7 +71,6 @@ $$
 
 ![img.png](img.png)
 
-
 其中的 ![[公式]](https://www.zhihu.com/equation?tex=%5Cgamma) 指的是衰减因子，体现了**未来的奖励在当前时刻的价值比例，这样要注意的就是Gt并不只是一条路径，从t时刻到终止状态，可能会有多条路径，后面的例子会体现到。**
 
 ![[公式]](https://www.zhihu.com/equation?tex=%5Cgamma) 接近0，则表明趋向于“ **近视** ”性评估； ![[公式]](https://www.zhihu.com/equation?tex=%5Cgamma) 接近1则表明**偏重考虑远期**的利益，完整slides如下：
@@ -88,7 +87,218 @@ v(s) = E [ G_{t} | S_{t} = s ]
 
 注：价值可以仅描述状态，也可以描述某一状态下的某个行为，在一些特殊情况下还可以仅描述某个行为。在整个视频公开课中，除了特别指出，约定用状态价值函数或价值函数来描述针对状态的价值；用行为价值函数来描述某一状态下执行某一行为的价值，严格意义上说行为价值函数是“状态行为对”价值函数的简写。
 
+## 基于表格的RL方法
 
+### Sarsa和Qlearning
+
+Sarsa,展开为(state,action,reward,next_state,next_action)这么一个五元组，Q-learning为（state,action,reward,next_state）的四元组。
+
+一个回合中包含状态，动作，奖励的序列
+
+![](//upload-images.jianshu.io/upload_images/10304749-fad58c03dfacfb22.png?imageMogr2/auto-orient/strip|imageView2/2/w/506/format/webp)
+
+image.png
+
+Sarsa的Q函数更新公式:
+
+![](//upload-images.jianshu.io/upload_images/10304749-7a09282785869308.png?imageMogr2/auto-orient/strip|imageView2/2/w/496/format/webp)
+
+image.png
+
+其中α为学习率，γ为奖励折现因子，∈[0,1]，γ越大表示关注长期受益，越小表示关注短期受益。
+
+TD-error，时序差分，下一个状态和当前状态收益的差值，我们希望|Q（st,at）-Q(st+1,at+1)|越小越好
+
+![](//upload-images.jianshu.io/upload_images/10304749-b22758aa459bd08d.png?imageMogr2/auto-orient/strip|imageView2/2/w/682/format/webp)
+
+image.png
+
+Qlearning的Sarsa异同，主要是以下三处，初始化状态，Q函数的更新和状态-动作的更新:
+
+![](//upload-images.jianshu.io/upload_images/10304749-6b29a9eae930b852.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
+
+saVsq.png
+
+解释：
+
+Sarsa是一种on-policy的算法（边学习边预测）从它的五元组中也可以看出多了一个next_aciton,这个action是通过查表得到的；Q-learning是一种off-policy的算法（先学习后预测）。
+
+Sarsa的代码部分：
+
+玩的是Frozen-lake游戏，希望从左上到右下的黄色（goal）,状态是格子位置，动作是上下左右，奖励，白色1，黑色-100,黄色100。
+
+![](//upload-images.jianshu.io/upload_images/10304749-79b4f13058c06ad6.png?imageMogr2/auto-orient/strip|imageView2/2/w/343/format/webp)
+
+image.png
+
+```python
+import gym
+import numpy as np
+import time
+#Agent
+class SarsaAgent(object):
+    def __init__(self, obs_n, act_n, learning_rate=0.01, gamma=0.9, e_greed=0.1):
+        self.act_n = act_n      # 动作维度，有几个动作可选
+        self.lr = learning_rate # 学习率
+        self.gamma = gamma      # reward的衰减率
+        self.epsilon = e_greed  # 按一定概率随机选动作
+        self.Q = np.zeros((obs_n, act_n))
+
+    # 根据输入观察值，采样输出的动作值，带探索
+    def sample(self, obs):
+        #e-gredy贪婪策略，<表示利用，否则为探索
+        if(np.random.uniform(0,1)<1-self.epsilon):
+            action = self.predict(obs)
+        else:
+            action = np.random.choice(self.act_n)
+        return action
+
+    # 根据输入观察值，预测输出的动作值
+    def predict(self, obs):
+        q_list = self.Q[obs,:]
+        max_a = np.max(q_list)
+        action_list = np.where(max_a==q_list)[0]  ## maxQ可能对应多个action
+        action = np.random.choice(action_list)  
+        return action
+
+    # 学习方法，也就是更新Q-table的方法
+    def learn(self, obs, action, reward, next_obs, next_action, done):
+        """ on-policy
+            obs: 交互前的obs, s_t
+            action: 本次交互选择的action, a_t
+            reward: 本次动作获得的奖励r
+            next_obs: 本次交互后的obs, s_t+1
+            next_action: 根据当前Q表格, 针对next_obs会选择的动作, a_t+1
+            done: episode是否结束
+        """
+        if(done):
+            target_q = reward
+        else:
+            target_q = reward + self.gamma*self.Q[next_obs,next_action]
+        self.Q[obs,action] += self.lr*(target_q-self.Q[obs,action])
+    
+    # 保存Q表格数据到文件
+    def save(self):
+        npy_file = './q_table.npy'
+        np.save(npy_file, self.Q)
+        print(npy_file + ' saved.')
+  
+    # 从文件中读取数据到Q表格中
+    def restore(self, npy_file='./q_table.npy'):
+        self.Q = np.load(npy_file)
+        print(npy_file + ' loaded.')
+
+#训练&&测试
+def run_episode(env, agent, render=False):
+        total_steps = 0 # 记录每个episode走了多少step
+        total_reward = 0
+
+        obs = env.reset() # 重置环境, 重新开一局（即开始新的一个episode）
+        action = agent.sample(obs) # 根据算法选择一个动作
+
+    while True:
+        next_obs, reward, done, _ = env.step(action) # 与环境进行一个交互
+        next_action = agent.sample(next_obs) # 根据算法选择一个动作
+        # 训练 Sarsa 算法
+        agent.learn(obs, action, reward, next_obs, next_action, done)
+
+        action = next_action
+        obs = next_obs  # 存储上一个观察值
+        total_reward += reward
+        total_steps += 1 # 计算step数
+        if render:
+            env.render() #渲染新的一帧图形
+        if done:
+            break
+    agent.save()
+    return total_reward, total_steps
+
+def run_episode1(env,agent,render=False):
+    ##获取s,a
+    total_reward = 0
+    steps = 0
+    obs = env.reset()
+    action = agent.sample(obs)
+    #开启循环
+    while(True):
+        #评估a获得s_,r,done
+        next_obs,reward,done,_ = env.step(action)
+        #获取a'
+        next_action = agent.sample(next_obs)
+        #训练sarsa算法
+        agent.learn(obs,action,reward,next_obs,next_action,done)
+        #更新s,a
+        obs = next_obs
+        total_reward += reward
+        action = next_action
+        steps += 1
+        if(render):
+            env.render()
+        if(done):
+            break
+    agent.save()
+    return total_reward,steps
+
+def test_episode(env, agent):
+    total_reward = 0
+    obs = env.reset()
+    while True:
+        action = agent.predict(obs) # greedy
+        next_obs, reward, done, _ = env.step(action)
+        total_reward += reward
+        obs = next_obs
+        # time.sleep(0.5)
+        # env.render()
+        if done:
+            break
+    return total_reward
+
+#创建环境和Agent，启动训练
+# 使用gym创建迷宫环境，设置is_slippery为False降低环境难度
+env = gym.make("FrozenLake-v0", is_slippery=False)  # 0 left, 1 down, 2 right, 3 up
+
+# 创建一个agent实例，输入超参数
+agent = SarsaAgent(
+        obs_n=env.observation_space.n,
+        act_n=env.action_space.n,
+        learning_rate=0.1,
+        gamma=0.9,
+        e_greed=0.1)
+
+
+# 训练500个episode，打印每个episode的分数
+for episode in range(500):
+    ep_reward, ep_steps = run_episode1(env, agent, False)
+    print('Episode %s: steps = %s , reward = %.1f' % (episode, ep_steps, ep_reward))
+
+# 全部训练结束，查看算法效果
+test_reward = test_episode(env, agent)
+print('test reward = %.1f' % (test_reward))
+```
+
+Q-learning算法的sample和predict方法与Sarsa完全一致，不同的地方在于learn方法：
+
+```
+ #学习方法，也就是更新Q-table的方法
+def learn(self, obs, action, reward, next_obs, done):
+      """ off-policy
+          obs: 交互前的obs, s_t
+          action: 本次交互选择的action, a_t
+          reward: 本次动作获得的奖励r
+          next_obs: 本次交互后的obs, s_t+1
+          done: episode是否结束
+      """
+      if(done):
+          target_q = reward
+      else:
+          target_q = reward + self.gamma*np.max(self.Q[next_obs,:])
+      self.Q[obs,action] += self.lr*(target_q - self.Q[obs,action])
+```
+
+Q-learning与环境的交互
+![img_2.png](img_2.png)
+Sarsa与环境的交互
+![img_3.png](img_3.png)
 
 ## 关键词
 
@@ -186,3 +396,4 @@ v(s) = E [ G_{t} | S_{t} = s ]
 ## 补充学习资料
 
 1. https://cloud.tencent.com/developer/article/1167673
+2. [强化学习笔记(一）基于表格型方法求解RL，Sarsa和Q-learning](https://www.jianshu.com/p/3f0d1f453533)
