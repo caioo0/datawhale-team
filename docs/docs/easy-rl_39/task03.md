@@ -1,4 +1,4 @@
-# task03 策略梯度与PPO算法
+# task03:策略梯度与PPO算法
 > （本学习笔记来源于DataWhale-第39期组队学习：[强化学习](https://linklearner.com/datawhale-homepage/#/learn/detail/91)） ,
 > [B站视频讲解](https://www.bilibili.com/video/BV1HZ4y1v7eX) 观看地址
 

@@ -37,7 +37,7 @@ $$
 
 使用学生马尔科夫链这个例子来讲解相关概念和计算。
 
-![img.png](img/task02-02.png)
+![img.png](task02-02.png)
 
 图中，圆圈表示学生所处的状态，方格Sleep是一个终止状态，或者可以描述成自循环的状态，也就是Sleep状态的下一个状态100%的几率还是自己。
 
@@ -75,7 +75,7 @@ $$
 
 ![[公式]](https://www.zhihu.com/equation?tex=%5Cgamma) 接近0，则表明趋向于“ **近视** ”性评估； ![[公式]](https://www.zhihu.com/equation?tex=%5Cgamma) 接近1则表明**偏重考虑远期**的利益，完整slides如下：
 
-![img_1.png](img/task02-03_img_1.png)
+![img_1.png](img_1.png)
 
 ## 价值函数 Value Function
 
@@ -296,9 +296,9 @@ def learn(self, obs, action, reward, next_obs, done):
 ```
 
 Q-learning与环境的交互
-![img_2.png](img/task02-03_img_2.png)
+![img_2.png](img_2.png)
 Sarsa与环境的交互
-![img_3.png](img/task02-03_img_3.png)
+![img_3.png](img_3.png)
 
 ## 关键词
 
@@ -397,3 +397,6 @@ Sarsa与环境的交互
 
 1. https://cloud.tencent.com/developer/article/1167673
 2. [强化学习笔记(一）基于表格型方法求解RL，Sarsa和Q-learning](https://www.jianshu.com/p/3f0d1f453533)
+3. [马尔科夫决策过程之Markov Reward Process（马尔科夫奖励过程）](https://zhuanlan.zhihu.com/p/35231424)
+
+
