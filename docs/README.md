@@ -3,6 +3,7 @@
 记录我参加的Datawhale组队学习，包括笔记和习题解答。
 
 #### 目录
+- 2022-08 [第40期 计算之魂](docs/The_soul_of_a_calculation_40/README.md)
 - 2022-07 [第39期 蘑菇书EasyRL](docs/easy-rl_39/README.md)
 - 2022-06 [第38期 GitModel数学建模](docs/gitModeling_37/README.md)
 - 2022-03 [第35期 深入浅出PyTorch](docs/thorough_pytorch/README.md)
