@@ -1,7 +1,7 @@
 * [DataWhale组队学习](README.md)
   - [第43期 跨模态神经搜索实践](docs/vced_43/README.md)
     * [Task01-课程环境准备](docs/vced_43/task01.md)
-  - [数据分析思维-分析方法和业务只是](Data_analysis_thinking_for_monkey/README.md)
+  - [数据分析思维-分析方法和业务](Data_analysis_thinking_for_monkey/README.md)
     * [第1章 业务指标](Data_analysis_thinking_for_monkey/chapter01.md)
     * [第2章 分析方法](Data_analysis_thinking_for_monkey/chapter02.md)
     * [第3章 用数据分析解决问题](Data_analysis_thinking_for_monkey/chapter03.md)
