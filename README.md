@@ -1,8 +1,8 @@
-# 我的DataWahle组队学习
+# 我的DataWhale组队学习
 
 记录我参加的Datawhale组队学习，包括笔记和习题解答。
 
-#### 目录
+### 学习记录
 - 2022-11 [第43期 跨模态神经搜索实践](datawhale-team/docs/vced_43/README.md)
 - 2022-08 [第40期 计算之魂](datawhale-team/docs/The_soul_of_a_calculation_40/README.md)
 - 2022-07 [第39期 蘑菇书EasyRL](docs/easy-rl_39/README.md)
@@ -14,7 +14,7 @@
 - 2021-09 [第29期 数据可视化（Matplotlib）](/datawhale-team/docs/fantastic-matplotlib_29/README)
 - 2021-08 [第28期 NLP课程（Transformer）](/datawhale-team/docs/transformers_NLP_28/README)
 
-#### 学习资料
+### DataWhale文档
 
 【1】[第28期组队学习-基于Transformers的自然语言处理](https://github.com/datawhalechina/learn-nlp-with-transformers)    
 【2】[第29期组队学习-Matplotlib可视化](https://github.com/datawhalechina/fantastic-matplotlib)  
@@ -23,6 +23,6 @@
 【5】[第31期组队学习-水很深的深度学习](https://datawhalechina.github.io/unusual-deep-learning)  
 【6】[第32期组队学习-推荐系统](https://github.com/datawhalechina/fun-rec)  
 
-### 知识分享
+### 社交网站
 
 [@ 蔡-Choi-恒者行远](https://github.com/caioo0)
