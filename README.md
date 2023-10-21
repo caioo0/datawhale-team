@@ -3,6 +3,8 @@
 记录我参加的Datawhale组队学习，包括笔记和习题解答。
 
 ### 学习记录
+
+- 2023-02 [第46期 大数据处理技术导论](https://github.com/datawhalechina/juicy-bigdata)
 - 2022-11 [第43期 跨模态神经搜索实践](datawhale-team/docs/vced_43/README.md)
 - 2022-08 [第40期 计算之魂](datawhale-team/docs/The_soul_of_a_calculation_40/README.md)
 - 2022-07 [第39期 蘑菇书EasyRL](docs/easy-rl_39/README.md)
@@ -22,7 +24,7 @@
 【4】[第30期组队学习-树模型与集成学习](https://datawhalechina.github.io/machine-learning-toy-code/)  
 【5】[第31期组队学习-水很深的深度学习](https://datawhalechina.github.io/unusual-deep-learning)  
 【6】[第32期组队学习-推荐系统](https://github.com/datawhalechina/fun-rec)  
-
+【7】[第46期组队学习-大数据处理技术导论](https://github.com/datawhalechina/juicy-bigdata)
 ### 社交网站
 
 [@ 蔡-Choi-恒者行远](https://github.com/caioo0)

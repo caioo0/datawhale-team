@@ -50,11 +50,15 @@
             placeholder: '搜索',
             noData: '找不到结果！',
         },
-        count: {
+         count: {
             countable: true,
+            position: 'top',
+            margin: '10px',
+            float: 'right',
             fontsize: '0.9em',
             color: 'rgb(90,90,90)',
-            language: 'chinese'
+            language: 'chinese',
+            isExpected: true
         },
         markdown: {
             renderer: {
@@ -72,7 +76,7 @@
             function(hook) {
                 var footer = [
                     '<footer style="text-align: center;margin-top: 50px;">',
-                    '<span> Made with <svg xmlns="http://www.w3.org/2000/svg" width="24" height="15" viewBox="0 0 24 24" fill="red" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> by <a href="https://github.com/caioo0" target="_blank">@Jochoi</a>  &copy; 2022 </span>',
+                    '<span> Made with <svg xmlns="http://www.w3.org/2000/svg" width="24" height="15" viewBox="0 0 24 24" fill="red" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> by <a href="https://github.com/caioo0" target="_blank">@Jochoi</a>  &copy; 2023 </span>',
                     '</footer>'
                 ].join('');
 
@@ -102,7 +106,7 @@
 <script src="assets/js/main.js"></script>
 <script src="assets/js/index.min.js"></script>
 <script src="assets/npm/external-script.min.js"></script>
-<script src="./assets/countable.js"></script>
+<script src="./assets/npm/countable.js"></script>
 </body>
 
 </html>
