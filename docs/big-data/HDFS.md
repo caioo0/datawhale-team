@@ -1,20 +1,28 @@
-# 第3章 Hadoop分布式文件系统
+# task02:HDFS
 ---
 
-（本学习笔记来源于[DataWhale-妙趣横生大数据](https://shenhao-stu.github.io/Big-Data/)）
+（本学习笔记整理自[datawhale-大数据处理技术导论](https://github.com/datawhalechina/juicy-bigdata)，部分内容来自其他相关参考教程）
 
 `数据块/副本` `负载均衡` `心跳机制` `副本存放策略` `元数据/元数据管理` `安全模式` `机架感知`
 
-## 3.1 HDFS前言 
+## 2.1 HDFS前言
 
-**HDFS(hadoop Distributed File System)** 是Hadoop下的分布式文件系统，主要用来解决海量数据的存储问题。具有高容错、高吞吐量等特性，可以部署在低成本的硬件上。
+**HDFS(hadoop Distributed File System)** 是Hadoop下的核心项目，作为一个分布式文件系统，主要用来解决海量数据的存储问题。具有高容错、高吞吐量等特性，可以部署在低成本的硬件上。
+
+HDFS 采用主/从架构，由NameNode和DataNode组成。
+
+NameNode：主节点，负责HDFS的命名空间，解析客户端的请求，控制客户端对HDFS的访问。单个命名空间一般包含2-3个节点，用来做高可用。
+
+DataNode: 从节点，主要用作物理存储，其数量视集群规模而定。 
+
+**HDFS思想：**
 
 - 设计思想
    分而治之，将大文件，大批量文件，分布式的存放于大量服务器上。以便于采取分而治之的方法对海量数据及逆行运算分析
 - 在大数据系统架构中的应用：为各类分布式运算框架（MapReduce,Spark,Tez,Flink）提供数据存储服务。
 - 重点概念：数据块/副本，负载均衡，心跳机制，副本存放策略，元数据/元数据管理，安全模式，机架感知
 
-## 3.2 HDFS设计思路
+## 2.2 HDFS设计思路
 
 HDFS被设计成用来使用低廉的服务器来进行海量数据的存储，那是怎么做到的呢？
 
@@ -45,48 +53,69 @@ HDFS中的`fsck`指令可以显示块信息。
 % hdfs fsck / -files -blocks 
 ```
 
+## 2.3 HDFS架构
 
-## 3.3 HDFS架构
+HDFS是Hadoop的一个核心项目，作为一个分布式文件系统，它承载着整个Hadoop生态系统。HDFS为Hadoop生态系统中的上层应用和用户提供可扩展、高吞吐、高可靠的数据存储服务，是一个无可替代的基础设施，对可靠性和性能有着较高的要求。
+
+HDFS将故障视作常态，并将其设计成高容错，还针对Hadoop的具体使用场景进行了特性优化，比如将HDFS设定成一次写入多次读取的形式来提升性能。
+
+HDFS采用主/从架构，由NameNode和DataNode组成。其中NameNode为主节点，主要负责管理HDFS的命名空间、解析客户端的请求、控制客户端对HDFS的访问。单个命名空间一般包含2到3个节点，用来做高可用。DataNode为从节点，主要用作物理存储，其数量视集群规模而定。
 
 
 ![img.png](images/chapter03-01.png)
 
+在HDFS中，文件以数据块（逻辑块）的形式存储，一个文件根据数据块的大小被切分为n个数据块。
 
-### 3.2.1 HDFS 架构
+HDFS将元数据信息存储在NameNode中，具体的文件数据块存储在DataNode中。
 
-HDFS遵循主/从架构，由单个名称节点NameNode(NN)和多个数据节点DataNode(DN)组成：
+元数据信息包括文件的inode信息、文件和数据块的映射信息、数据块和DataNode的映射信息，这些信息将常驻在NameNode内存中。
 
-- **NameNode**:负责执行有关`文件系统命名空间`的操作，它维护着文件系统树及整颗树内所有的文件和目录。 这些信息以两个文件形式永久保存在本地磁盘上:`命名空间镜像文件`和`编辑日志文件`。例如打开，关闭，重命名文件和目录等。它同时还负责集群元数据的存储，记录着文件中各个数据块的位置信息。
-- **SecondaryNamenode**： 辅助namenode,严格说并不是 NameNode 备份节点，主要给 namenode 分担压力之用
-- **DataNode**:负责提供来自文件系统客户端的读写请求，在NameNode的统一调度下进行数据块的创建，删除和复制等操作。
+为了容错，将文件数据块的3个副本冗余存储在多个DataNode中，存储规则为如果当前客户端（发起与HDFS进行交互请求的程序所在的服务器）是DataNode，则将第一个副本写入本机；如果当前客户端不是DataNode，则从集群中随机选一台DataNode（优先从与客户端相同机架上选）存储第一个副本；选好第一个副本的位置之后，其余两个就容易了，第二个副本放在另一个机架上，第三个副本放在与第二个副本同一个机架的另一个DataNode上。
+
+把元数据信息和文件数据块信息分开存储的策略从架构上对HDFS进行了解耦，降低了系统的故障率，提高了读写性能，能对各个组件进行优化扩展。
+
+
+
+**NameNode: HDFS中的主节点，其主要作用为：**
+
+- 负责管理HDFS的命名空间，集群信息和数据块；
+- 维护整个HDFS的文件目录树、文件目录的元信息和每个文件对应的数据块列表；
+- 接收客户端的操作请求；
+- 管理文件和数据块、数据块和DataNode之间的映射关系。
+
+**SecondaryNamenode：** 
+
+- 辅助namenode,严格说并不是 NameNode 备份节点，主要给 namenode 分担压力之用
+
+**DataNode:**
+
+- 负责提供来自文件系统客户端的读写请求，在NameNode的统一调度下进行数据块的创建，删除和复制等操作。
 - 每个数据节点会周期性地向名称节点发送"**心跳**"信息，报告自己的状态，没有按时发送心跳信息的数据节点会被标记为"宕机"，不会再给它分配任何I/O请求。 由于数据不再可用，可能会导致某些块的复制因子小于其指定值，NameNode 会跟踪这些块，并在必要的时候进行重新复制。
 
-用户在使用HDFS时，仍然可以像在普通文件系统中那样，使用文件名去存储和访问文件。
+
 
 
 
 实际上，在系统内部，一个文件会被切分成若干个数据块，这些数据块被分布存储到若干个数据节点.当客户端需要访问一个文件时，首先把文件名发送给名称节点，名称节点根据文件名找到对应的数据块（所有相关），再根据每个数据块信息找到实际存储的数据节点位置并发送给客户端，客户端直接访问这些数据节点并获取数据。
 
-> 注意：在整个访问过程中，名称节点并不参与数据的传输。
+> 注意：在整个访问过程中，名称节点并不参与数据的传输。用户在使用HDFS时，仍然可以像在普通文件系统中那样，使用文件名去存储和访问文件。
 
 这种设计方式，是的各个文件的数据能够在不同的数据节点上实现并发访问，大大提高数据访问速度。
 
 
 
-
-### 3.2.2 文件系统命名空间
+### 2.2.2 文件系统命名空间
 
 HDFS的`文件系统命名空间`的层次结构与大多数文件系统类似（如linux）,支持目录和文件的创建、移动、删除和重命名等操作，支持配置用户和访问权限，但不支持硬连接和软连接。
 
 `NameNode`负责维护文件系统名称空间，记录对名称空间或其属性的任何更改。
 
-
-## 3.3 数据存放策略
+## 2.3 数据存放策略
 
 数据存取策略包括**数据存放、数据读取和数据复制**。
 
 
-### 3.3.1 数据存放
+### 2.3.1 数据存放
 
 HDFS采用了以机架(Rack)为基础的数据存放策略。一个HDFS集群通常包含多个机架，不同机架之间的数据通信需要经过**交换机或路由器**，同一个机架的不同机器之间数据通信**不需要交换机或路由器**，在大多数情况下，相同机架上节点间的网络带宽优于在不同机架上的节点。
 
@@ -116,12 +145,12 @@ HDFS默认的冗余复制因子是3，每一个文件会被同时保存到3个�
 
 如果还有更多的副本就随机放在集群的 node 中，限制每个 node 不超过一个副本，同时保持每个机架的副本数量低于上限（（副本数-1）/机架 + 2）。
 
-### 3.3.2 数据读取
+### 2.3.2 数据读取
 
 HDFS提供了一个API，用于确定一个数据节点所属的机架的ID，客户端可以调用该API获取自己所属机架的ID。
 当客户端读取数据时，从名称节点获取数据块不同副本的存放位置的列表，列表中包含了副本所在的数据节点，可以调用API确定客户端和这些数据节点所属的机架ID。当发现某个数据块副本对应的机架ID和客户端对应的机架的ID相同时，则优先选择该副本读取数据；如果没有发现，则随机选择一个副本读取数据。
 
-### 3.3.3 数据复制
+### 2.3.3 数据复制
 
 HDFS的数据复制采用了 **流水线复制** 的策略，大大提高了数据复制过程的效率。
 
@@ -129,9 +158,9 @@ HDFS的数据复制采用了 **流水线复制** 的策略，大大提高了数�
 
 > 当客户端要向HDFS中写入一个文件时，这个文件会首先被写入本地，并被切分成若干个块，每个块的大小是由HDFS的设定值来决定。每个块都向HDFS集群中的名称节点发起写请求，名称节点会根据系统中各个数据节点的使用情况，选择一个数据节点列表返回给客户端，然后客户端就把数据首先写入列表中的第1个数据节点，同时把列表传给第1个数据节点，当第1个数据节点接收到一个块的数据的时候，将其写入本地，并且向列表中的第2个数据节点发起连接请求，把自己已经接收到的数据和列表传给第2个数据节点，当第2个数据节点接收到数据的时候，将其写入本地，并且向列表中的第3个数据节点发起连接请求，依次类推，列表中的多个数据节点形成一条数据复制的流水线。最后，当文件写完的时候，数据复制也同时完成。
 
-### 3.3.4  修改副本数
+### 2.3.4  修改副本数
 
-第一种方式:修改集群文件 hdfs-site.xml
+第一种方式:修改集群文件 `/opt/hadoop/etc/hadoop/hdfs-site.xml`
 
 ```
 <property> 
@@ -147,9 +176,9 @@ HDFS的数据复制采用了 **流水线复制** 的策略，大大提高了数�
 bin/hadoop fs -setrep -R 1 /
 ```
 
-## 3.4 HDFS 核心设计
+## 2.4 HDFS 核心设计
 
-### 3.4.1 Hadoop 心跳机制
+### 2.4.1 Hadoop 心跳机制
 
 - Hadoop 是 Master/Slave 结构，Master 中有 NameNode 和 ResourceManager，Slave 中有 Datanode 和 NodeManager
 - aster 启动的时候会启动一个 IPC(Inter-Process Comunication，进程间通信)server 服 务，等待 slave 的链接
@@ -185,7 +214,7 @@ $$
 ```
 
 
-### 3.4.2 HDFS安全模式
+### 2.4.2 HDFS安全模式
 
 **问题：** 集群启动后，可以查看目录，但是上传文件时报错，打开 web 页面可看到 namenode正处于 `safemode` 状态，怎么处理?
 
@@ -218,7 +247,7 @@ hdfs dfsadmin -safemode wait //等待，一直到安全模式结束
 如果你使用的版本是 2.X 之前的版本，那么这个 hdfs 命令可以替换成 hadoop，它们都在 bin 目录下
 
 
-### 3.4.3 负载均衡
+### 2.4.3 负载均衡
 
 机器与机器之间磁盘利用率不平衡时HDFS集群非常容易出现的情况。
 尤其在DataNode节点出现故障或在现有的集群上增添新的DataNode的时候分析数据块分布和重新均衡DataNode上的数据分布的工具
@@ -251,9 +280,9 @@ sbin/start-balancer.sh -t 10%
 机器容量最高的那个值 和 最低的那个值得差距 不能超过 10%
 
 
-## 3.5 HDFS的数据读写过程
+## 2.5 HDFS的数据读写过程
 
-### 3.5.1 读数据的过程
+### 2.5.1 读数据的过程
 
 具体流程：
 
@@ -265,7 +294,7 @@ sbin/start-balancer.sh -t 10%
 6. 找到该数据块的最佳数据节点，读取数据。
 7. 当客户端读取完毕数据的时候，调用FSDataInputStream的close()函数，关闭输入流。需要注意的是，在读取数据的过程中，如果客户端与数据节点通信时出现错误，就会尝试连接包含此数据块的下一个数据节点。
 
-### 3.5.2 写数据的过程
+### 2.5.2 写数据的过程
 
 具体流程：
 
@@ -276,7 +305,7 @@ sbin/start-balancer.sh -t 10%
 5. 因为各个数据节点位于不同机器上，数据需要通过网络发送，因此，为了保证所有数据节点的数据都是准确的，接收到数据的数据节点要向发送者发送“确认包”（ACK Packet）。确认包沿着数据流管道逆流而上，从数据流管道依次经过各个数据节点并最终发往客户端，当客户端收到应答时，它将对应的分包从内部队列移除。不断执行第3~5步，直到数据全部写完。
 6. 客户端调用close()方法关闭输出流，此时开始，客户端不会再向输出流中写入数据，所以，当DFSOutputStream对象内部队列中的分包都收到应答以后，就可以使用ClientProtocol.complete()方法通知名称节点关闭文件，完成一次正常的写文件过程。
 
-## 3.6 HDFS优缺点
+## 2.6 HDFS优缺点
 
 **HDFS优点：**
 
@@ -301,7 +330,65 @@ sbin/start-balancer.sh -t 10%
 - NameNode存储block数量有限的，一个block元信息消耗大约150byte内存，存储1亿个block，大约需要20GB内存，如果一个文件大小为10k,则1亿个文件大小为1TB(但要消耗掉namenode 20GB 内存)。
 
 
-## 3.7 HDFS 文件系统
+## 2.7 HDFS 文件系统
+
+1. 启动Hadoop的HDFS相关进程
+
+启动Hadoop的HDFS服务，使用**普通用户datawhale**执行如下命令：
+
+```shell
+
+cd /opt/hadoop/sbin/
+./start-dfs.sh
+```
+emsp;&emsp;输入`jps`命令可以查看所有的`Java`进程，正常启动后，可以得到如下类似结果：
+![img.png](images/HDFS_0308001.png)
+
+2. 验证HDFS运行状态
+```shell
+# 在hdfs上创建一个目录，执行如下命令，验证能够创建成功：
+datawhale@datawhale001:/root$ hadoop fs -mkdir /myhadoop1
+datawhale@datawhale001:/root$ hadoop fs -ls /
+Found 1 items
+drwxr-xr-x   - datawhale supergroup          0 2023-03-08 10:35 /myhadoop1
+```
+3. ls命令
+```shell
+datawhale@datawhale001:/root$ hadoop fs -mkdir /myhadoop1/word.txt
+# 列出hdfs文件系统根目录下的目录和文件
+datawhale@datawhale001:/root$ hadoop fs -ls /
+Found 1 items
+drwxr-xr-x   - datawhale supergroup          0 2023-03-08 10:38 /myhadoop1
+# 列出hdfs文件系统所有的目录和文件
+datawhale@datawhale001:/root$ hadoop fs -ls -R /
+drwxr-xr-x   - datawhale supergroup          0 2023-03-08 10:38 /myhadoop1
+drwxr-xr-x   - datawhale supergroup          0 2023-03-08 10:38 /myhadoop1/word.txt
+
+```
+
+4. put命令
+
+```shell
+# 拷贝文件 
+datawhale@datawhale001:/data/hadoop$ sudo vim README.txt
+datawhale@datawhale001:/data/hadoop$ cat README.txt
+hello world
+hello spark
+hello hadoop
+hello spark
+hello hdfs 
+datawhale@datawhale001:/opt/hadoop$ hadoop fs -put /data/hadoop/README.txt /
+datawhale@datawhale001:/opt/hadoop$ hadoop fs -ls /
+Found 2 items
+-rw-r--r--   1 datawhale supergroup         60 2023-03-08 10:55 /README.txt
+drwxr-xr-x   - datawhale supergroup          0 2023-03-08 10:38 /myhadoop1
+datawhale@datawhale001:/opt/hadoop$ hadoop fs -cat /README.txt
+hello world
+hello spark
+hello hadoop
+hello spark
+hello hdfs
+```
 
 HDFS 文件系统可以执行常用的文件系统操作，例如，读取文件，新建目录，移动文件，删除数据，列出目录，等等。可以输入 `hadoop fs -help`命令获取每个命令的详细帮助文件。
 
@@ -339,7 +426,7 @@ hadoop fs -ls .
 
 HDFS的文件访问权限模式跟POSIX 的权限模式非常相似。一个提供了三类权限模式：只读权限(r)、写入权限(w)和可执行权限(x)。每个文件和目录都有所属用户(owner)、所属组别（group）及模式（mode）.
 
-### 3.7.2 Hadoop文件系统 
+### 2.7.2 Hadoop文件系统 
 
 Hadoop有一个抽象的文件系统概念，HDFS只是其中的一个实现。Java抽象类`org.apache.hadoop.fs.FileSystem`定义了Hadoop中一个文件系统的客户端接口。
 ![img.png](images/chapter03-06.png)
@@ -381,9 +468,28 @@ hdfs dfsadmin -report
 hdfs dfsadmin -safemode leave
 ```
 
+## 2.8 HA模式
+
+在Hadoop 2.0之前，HDFS中只有一台NameNode，虽然有一台Secondary NameNode会周期性地将NameNode内存中的状态持久化为fsimage文件，但是当NameNode出现故障死机之后，Secondary NameNode并不能马上代替它提供服务。换言之，NameNode存在单点故障问题。在一个分布式系统中，尤其在生产环境中，单点故障是不允许存在的。因此在Hadoop 2.0之后，HDFS推出了HA功能，在Hadoop 3.0之后，又推出了多个NameNode的HA功能，使得HDFS更加稳定。
+
+HDFS提供两套NameNode的HA方案
+
+- 基于QJM（Quorum Journal Manager） (更常被使用，功能也较为完善)
+- 基于NFS
+
+### 2.8.1 基于QJM的HA
+
+考虑点：
+
+- 哪些数据需要共享，如何共享
+- 如何选举主节点，如何避免脑裂
+
+![img](./images\150224_CQHb_103310.png)
+
+HA的架构图
+
 ## 参考资料
 
 1. [HDFS 副本存放策略](https://www.freesion.com/article/32251142386/)
 2. [HDFS知识整理](https://www.freesion.com/article/3093185943/)
 4. [Hadoop源码分析之FileSystem抽象文件系统](https://www.cnblogs.com/dj-blog/p/9178465.html)
-
