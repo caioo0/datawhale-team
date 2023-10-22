@@ -74,11 +74,11 @@ $$
   
     梯度下降核心内容是对自变量进行不断的更新（针对w和b求偏导），使得目标函数不断逼近最小值的过程：
     $$
-    w \larr w - a \frac{\partial{L}}{\partial{w}}
+    w \leftarrow w - a \frac{\partial{L}}{\partial{w}}
     $$
   
     $$
-    b \larr b - a \frac{\partial{L}}{\partial{b}}
+    b \rightarrow b - a \frac{\partial{L}}{\partial{b}}
     $$
   
     
@@ -91,8 +91,27 @@ $$
 
 ## 3 对数几率回归
 
-- 单位阶跃函数：若预测值$z$大于零判为正例，小于零判为反例，预测值为临界值零则可任意判别。
-- 对数几率函数：$y=\frac{1}{1+e^{-z}}$
+单位阶跃函数：若预测值$z$大于零判为正例，小于零判为反例，预测值为临界值零则可任意判别。
+
+$$
+y = \left \{
+\begin{matrix}
+ 0,   z<0; \\
+ 0.5, z=0; \\
+ 1,   z>0 
+\end{matrix}
+\right.
+$$
+对数几率函数：
+
+$$
+y=\frac{1}{1+e^{-z}}
+$$
+
+从图3.2 可以看出单位阶跃函数不连续，
+
+![image-20231021125907389](.\img\image-20231021125907389.png)
+
 - 概念：若将$y$看做样本为正例的概率，$(1-y)$看做样本为反例的概率，则使用线性回归模型的预测结果器逼近真实标记的对数几率
 - 思路：使用最大似然估计的方法来计算出$w$和$b$两个参数的取值
   $\displaystyle \ln \frac{p(y=1 | x)}{p(y=0 | x)}=w^T x + b $
@@ -120,11 +139,17 @@ $$
 &=\sum_{x \in X_0} (x-\mu_0) (x-\mu_0)^T+ \sum_{x \in X_1}(x-\mu_1)(x-\mu_1)^T \end{aligned}
 $$
 5. 计算类间散度矩阵：
-    $$S_b=(\mu_0-\mu_1)(\mu_0-\mu_1)^T
+    
+    
+    $$
+    S_b=(\mu_0-\mu_1)(\mu_0-\mu_1)^T
+    $$
+     
 
-$$
 6. 计算LDA最大化的目标函数：
-$$
+
+   
+
    J=\frac{w^T S_b w}{w^T S_w w}
 
 $$
@@ -132,14 +157,14 @@ $$
 
 - LDA常被视为一种经典的监督降维技术。
 
-## 5 多分类学习
+## 5. 多分类学习
 
 - “拆分”策略：将多分类问题拆解为多个二分类问题，训练出多个二分类学习器，最后将多个分类结果进行集成得出结论。
 - “一对一”（OvO）：给定数据集$D$，假定其中有$N$个真实类别，将这$N$个类别进行两两配对（一个正类/一个反类），从而产生$N(N-1)/2$个二分类学习器，在测试阶段，将新样本提交给所有学习器，得出$N(N-1)$个结果，最终通过投票产生最终的分类结果。
 - “一对其余”（OvR）：给定数据集$D$，假定其中有$N$个真实类别，每次取出一个类作为正类，剩余的所有类别作为一个新的反类，从而产生$N$个二分类学习器，在测试阶段，得出$N$个结果，若仅有一个学习器预测为正类，则对应的类标作为最终分类结果。
 - “多对多”（MvM）：给定数据集$D$，假定其中有$N$个真实类别，每次取若干个类作为正类，若干个类作为反类（通过ECOC码给出，编码），若进行了$M$次划分，则生成了$M$个二分类学习器，在测试阶段（解码），得出$M$个结果组成一个新的编码，最终通过将预测编码与每个类别各自的编码进行比较，选择距离最小的类别作为最终分类结果。
 
-## 6 类别不平衡问题
+## 6. 类别不平衡问题
 
 - 概念：指分类问题中不同类别的训练样本相差悬殊的情况
 - 常用方法：
@@ -152,7 +177,116 @@ $$
 $$
 
 
+## 7. 代码实现
 
+文件1：LinerRegression.py
+```python
+# -*- coding: utf-8 -*-
+
+import numpy as np
+
+
+class LinerRegression(object):
+
+    def __init__(self, learning_rate=0.01, max_iter=100, seed=None):
+        np.random.seed(seed)
+        self.lr = learning_rate
+        self.max_iter = max_iter
+        self.w = np.random.normal(1, 0.1)
+        self.b = np.random.normal(1, 0.1)
+        self.loss_arr = []
+
+    def fit(self, x, y):
+        self.x = x
+        self.y = y
+        for i in range(self.max_iter):
+            self._train_step()
+            self.loss_arr.append(self.loss())
+            # print('loss: \t{:.3}'.format(self.loss()))
+            # print('w: \t{:.3}'.format(self.w))
+            # print('b: \t{:.3}'.format(self.b))
+
+    def _f(self, x, w, b):
+        return x * w + b
+
+    def predict(self, x=None):
+        if x is None:
+            x = self.x
+        y_pred = self._f(x, self.w, self.b)
+        return y_pred
+
+    def loss(self, y_true=None, y_pred=None):
+        if y_true is None or y_pred is None:
+            y_true = self.y
+            y_pred = self.predict(self.x)
+        return np.mean((y_true - y_pred)**2)
+
+    def _calc_gradient(self):
+        d_w = np.mean((self.x * self.w + self.b - self.y) * self.x)
+        d_b = np.mean(self.x * self.w + self.b - self.y)
+        return d_w, d_b
+
+    def _train_step(self):
+        d_w, d_b = self._calc_gradient()
+        self.w = self.w - self.lr * d_w
+        self.b = self.b - self.lr * d_b
+        return self.w, self.b
+
+```
+文件2：train.py
+
+```python
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import matplotlib.pyplot as plt
+from liner_regression import *
+
+
+def show_data(x, y, w=None, b=None):
+    plt.scatter(x, y, marker='.')
+    if w is not None and b is not None:
+        plt.plot(x, w*x+b, c='red')
+    plt.show()
+
+
+# data generation
+np.random.seed(272)
+data_size = 100
+x = np.random.uniform(low=1.0, high=10.0, size=data_size)
+y = x * 20 + 10 + np.random.normal(loc=0.0, scale=10.0, size=data_size)
+
+# plt.scatter(x, y, marker='.')
+# plt.show()
+
+# train / test split
+shuffled_index = np.random.permutation(data_size)
+x = x[shuffled_index]
+y = y[shuffled_index]
+split_index = int(data_size * 0.7)
+x_train = x[:split_index]
+y_train = y[:split_index]
+x_test = x[split_index:]
+y_test = y[split_index:]
+
+# visualize data
+# plt.scatter(x_train, y_train, marker='.')
+# plt.show()
+# plt.scatter(x_test, y_test, marker='.')
+# plt.show()
+
+# train the liner regression model
+regr = LinerRegression(learning_rate=0.01, max_iter=10, seed=314)
+regr.fit(x_train, y_train)
+print('cost: \t{:.3}'.format(regr.loss()))
+print('w: \t{:.3}'.format(regr.w))
+print('b: \t{:.3}'.format(regr.b))
+show_data(x, y, regr.w, regr.b)
+
+# plot the evolution of cost
+plt.scatter(np.arange(len(regr.loss_arr)), regr.loss_arr, marker='o', c='green')
+plt.show()
+```
 ## 7. 参考资料
 
 [1].[算法笔记-线性回归](https://www.cnblogs.com/geo-will/p/10468253.html)
